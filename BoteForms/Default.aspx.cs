@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Collections.Generic;
@@ -20,6 +21,30 @@ namespace BoteForms
                 Response.Cache.SetNoStore();
                 Session["MiVariable"] = null;
 
+            }
+        }
+        protected void btnConnect_Click(object sender, EventArgs e)
+        {
+            ConnectToDatabase();
+        }
+
+        private void ConnectToDatabase()
+        {
+            // Obtener la cadena de conexión desde el archivo web.config
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["CalculadoraBoteDB"].ConnectionString;
+
+            // Intentar abrir una conexión a la base de datos
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    lblMessage.Text = "Conexión exitosa a la base de datos.";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMessage.Text = "Error al intentar conectar a la base de datos: " + ex.Message;
             }
         }
         protected void chkHabilitarTextBox(object sender, EventArgs e)

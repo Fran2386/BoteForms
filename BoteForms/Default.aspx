@@ -10,6 +10,10 @@
                 <div class="input-group-append">
                     <asp:Button ID="btnCalcular" runat="server" Text="Calcular" CssClass="btn btn-primary" OnClick="BtnCalcularClick" />
                 </div>
+                <div>
+            <asp:Button ID="btnConnect" runat="server" Text="Connect to Database" OnClick="btnConnect_Click" />
+            <asp:Label ID="lblMessage" runat="server" Text=""></asp:Label>
+        </div>
             </div>
         </div>
     </div>
