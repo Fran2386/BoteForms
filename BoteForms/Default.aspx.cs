@@ -196,6 +196,12 @@ namespace BoteForms
 
 
 
+
+
+
+
+
+
         protected void RadioButttonSeleccionado(object sender, EventArgs e)
         {
             // Cast sender to RadioButton
