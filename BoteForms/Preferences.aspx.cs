@@ -24,73 +24,49 @@ namespace BoteForms
         }
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
-            // Crear un diccionario para almacenar los nombres de los trabajadores y sus horas trabajadas
-            Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
-
-            // Recorrer todos los controles CheckBox y TextBox generados dinámicamente
+            // Obtener el total de horas ingresadas por todos los trabajadores
+            int totalHoras = 0;
             foreach (Control control in phTrabajadores.Controls)
             {
-                if (control is CheckBox)
+                if (control is TextBox)
                 {
-                    CheckBox chkTrabajador = (CheckBox)control;
-                    if (chkTrabajador.Checked)
+                    TextBox txtHoras = (TextBox)control;
+                    int horas;
+                    if (int.TryParse(txtHoras.Text, out horas))
                     {
-                        string nombreTrabajador = chkTrabajador.Text;
-                        string idTextBox = "txtHoras_" + chkTrabajador.ID.Substring(chkTrabajador.ID.IndexOf("_") + 1);
-                        TextBox txtHoras = (TextBox)phTrabajadores.FindControl(idTextBox);
-                        if (txtHoras != null && !string.IsNullOrEmpty(txtHoras.Text) && int.TryParse(txtHoras.Text, out int horas))
-                        {
-                            valoresTrabajadores[nombreTrabajador] = horas;
-                        }
+                        totalHoras += horas;
                     }
                 }
             }
 
-            // Calcular el total de horas trabajadas por todos los trabajadores
-            int totalHorasTrabajadores = valoresTrabajadores.Values.Sum();
-
-            // Verificar si el total de horas es válido y calcular el bote si es así
-            if (totalHorasTrabajadores > 0 && int.TryParse(txtBote.Text, out int valorEntero))
+            // Calcular y mostrar el resultado para cada trabajador
+            int importeBote = Convert.ToInt32(txtBote.Text); // Suponiendo que el importe del bote está en el TextBox txtBote
+            foreach (Control control in phTrabajadores.Controls)
             {
-                double cashXHora = (double)valorEntero / totalHorasTrabajadores;
+                if (control is TextBox)
+                {
+                    TextBox txtHoras = (TextBox)control;
+                    string[] controlID = txtHoras.ID.Split('_');
+                    int index = Convert.ToInt32(controlID[1]);
 
-                // Calcular el pago para cada trabajador y mostrar los resultados en los labels correspondientes
-                foreach (var trabajador in valoresTrabajadores)
-                {
-                    string nombreTrabajador = trabajador.Key;
-                    int horasTrabajadas = trabajador.Value;
-                    double pagoTrabajador = cashXHora * horasTrabajadas;
+                    CheckBox chkTrabajador = (CheckBox)phTrabajadores.FindControl("chkTrabajador_" + index);
+                    Label lblResultado = (Label)phTrabajadores.FindControl("lblResultado_" + index);
 
-                    Label lblResultado = (Label)phTrabajadores.FindControl("lblResultado_" + nombreTrabajador.Substring(nombreTrabajador.IndexOf(" ") + 1));
-                    if (lblResultado != null)
+                    if (chkTrabajador != null && chkTrabajador.Checked)
                     {
-                        lblResultado.Text = pagoTrabajador.ToString("F2") + " €";
-                    }
-                }
-            }
-            else
-            {
-                // Manejar el caso en el que el total de horas o el valor del bote no sean válidos
-                if (txtBote.Text == "")
-                {
-                    txtBote.Attributes["placeholder"] = "Por favor introduce el monto del bote";
-                }
-                else
-                {
-                    foreach (Control control in phTrabajadores.Controls)
-                    {
-                        if (control is TextBox)
+                        int horasTrabajador;
+                        if (int.TryParse(txtHoras.Text, out horasTrabajador))
                         {
-                            TextBox textBox = (TextBox)control;
-                            if (string.IsNullOrEmpty(textBox.Text))
-                            {
-                                textBox.Attributes["placeholder"] = "Introduce las horas";
-                            }
+                            // Calcular el resultado y mostrarlo en el Label correspondiente al trabajador
+                            double resultado = (horasTrabajador / (double)totalHoras) * importeBote;
+                            lblResultado.Text = resultado.ToString("C"); // Muestra el resultado como moneda
                         }
                     }
                 }
             }
         }
+
+
 
 
 
@@ -111,7 +87,7 @@ namespace BoteForms
                 txtHoras.ID = "txtHoras_" + i;
                 txtHoras.CssClass = "form-control";
                 txtHoras.TextMode = TextBoxMode.Number;
-                txtHoras.Enabled = false;
+                txtHoras.Enabled = true;
 
                 Label lblResultado = new Label();
                 lblResultado.ID = "lblResultado_" + i;
