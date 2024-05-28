@@ -60,53 +60,6 @@ namespace BoteForms
             txtExtra2.Enabled = chkExtra2.Checked;
         }
 
-        /*protected void BtnCalcularClick(object sender, EventArgs e)
-        {
-            // Declarar una lista para almacenar los valores enteros
-            List<int> valoresParseados = new List<int>();
-
-            // Declarar variables para almacenar los valores enteros
-            int hrsAni, hrsCris, hrsDiana, hrsFran, hrsMarina, hrsVictor, hrsYoli, hrsExtra1, hrsExtra2;
-
-            // Convertir el valor de cada TextBox a entero y agregarlo a la lista si es posible
-            if (int.TryParse(txtAni.Text, out hrsAni))
-                valoresParseados.Add(hrsAni);
-
-            if (int.TryParse(txtCris.Text, out hrsCris))
-                valoresParseados.Add(hrsCris);
-
-            if (int.TryParse(txtDiana.Text, out hrsDiana))
-                valoresParseados.Add(hrsDiana);
-
-            if (int.TryParse(txtFran.Text, out hrsFran))
-                valoresParseados.Add(hrsFran);
-
-            if (int.TryParse(txtMarina.Text, out hrsMarina))
-                valoresParseados.Add(hrsMarina);
-
-            if (int.TryParse(txtVictor.Text, out hrsVictor))
-                valoresParseados.Add(hrsVictor);
-
-            if (int.TryParse(txtYoli.Text, out hrsYoli))
-                valoresParseados.Add(hrsYoli);
-
-            if (int.TryParse(txtExtra1.Text, out hrsExtra1))
-                valoresParseados.Add(hrsExtra1);
-
-            if (int.TryParse(txtExtra2.Text, out hrsExtra2))
-                valoresParseados.Add(hrsExtra2);
-
-            // Verificar si se han agregado valores a la lista
-            if (valoresParseados.Count > 0)
-            {
-                CalculoBote(valoresParseados);
-            }
-            else
-            {
-                // Manejar el caso en el que ninguno de los TextBox contenga un número entero válido
-                SetHorasEditables();
-            }
-        }*/
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
             Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
