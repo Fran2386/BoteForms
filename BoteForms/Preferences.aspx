@@ -1,11 +1,11 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master"  AutoEventWireup="true" CodeBehind="Preferences.aspx.cs" Inherits="BoteForms.Preferences" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Preferences.aspx.cs" Inherits="BoteForms.Preferences" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-        <div class="col-md-4">
-            <h2>Mi perfil</h2>
-             <asp:Label ID="MensajeBienvenida" runat="server" Text="" />
-        </div>
-      <div class="row">
+    <div class="col-md-4">
+        <h2>Mi perfil</h2>
+        <asp:Label ID="MensajeBienvenida" runat="server" Text="" />
+    </div>
+    <div class="row">
         <div class="col-md-4">
             <h2>Total de bote:</h2>
             <div class="input-group">
@@ -19,22 +19,30 @@
 
     <div class="row">
         <div class="col-md-4">
-            <h2>Número de trabajadores:</h2>
+            <h4>Número de trabajadores:
             <asp:DropDownList ID="ddlNumeroTrabajadores" runat="server" AutoPostBack="true" OnSelectedIndexChanged="ddlNumeroTrabajadores_SelectedIndexChanged">
                 <asp:ListItem Text="Seleccionar" Value="0"></asp:ListItem>
-                <asp:ListItem Text="1" Value="1"></asp:ListItem>
-                <asp:ListItem Text="2" Value="2"></asp:ListItem>
-                <asp:ListItem Text="3" Value="3"></asp:ListItem>
-
             </asp:DropDownList>
+                </h4>
         </div>
     </div>
 
     <div class="container">
-        <asp:PlaceHolder ID="phTrabajadores" runat="server"></asp:PlaceHolder>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Trabajador</th>
+                    <th>Horas semanales para el cómputo</th>
+                    <th>Bote correspondiente</th>
+                </tr>
+            </thead>
+            <tbody>
+                <asp:PlaceHolder ID="phTrabajadores" runat="server"></asp:PlaceHolder>
+            </tbody>
+        </table>
     </div>
+</asp:Content>
 
-     </asp:Content>
 
 
 
