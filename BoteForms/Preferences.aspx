@@ -12,6 +12,7 @@
                 <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" />
                 <div class="input-group-append">
                     <asp:Button ID="btnCalcular" runat="server" Text="Calcular" CssClass="btn btn-primary" OnClick="BtnCalcularClick" />
+                    <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-primary" OnClick="BtnLimpiar_Click" />
                 </div>
             </div>
         </div>

@@ -23,6 +23,12 @@ namespace BoteForms
 
             }
         }
+        protected void BtnLimpiar_Click(object sender, EventArgs e)
+        {
+           
+            Response.Redirect("~/");
+        }
+
         protected void btnConnect_Click(object sender, EventArgs e)
         {
             ConnectToDatabase();

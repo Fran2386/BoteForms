@@ -1,24 +1,22 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="BoteForms.Login" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="BoteForms.Login" %>
 
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title>Acceso</title>
-</head>
-<body>
-    <form id="form1" runat="server">
-        <div>
-            <h2>Acceso</h2>
-            <asp:Label ID="LoginErrorMessage" runat="server" ForeColor="Red"></asp:Label>
-            <br />
-            <asp:Label ID="Label1" runat="server" Text="Nombre de usuario"></asp:Label>
-            <asp:TextBox ID="UsernameLogin" runat="server"></asp:TextBox>
-            <br />
-            <asp:Label ID="Label2" runat="server" Text="Contraseña"></asp:Label>
-            <asp:TextBox ID="PasswordLogin" runat="server" TextMode="Password"></asp:TextBox>
-            <br />
-            <asp:Button ID="LoginButton" runat="server" Text="Acceder" OnClick="LoginButton_Click" />
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h2 class="text-center">Acceso</h2>
+                <asp:Label ID="LoginErrorMessage" runat="server" ForeColor="Red"></asp:Label>
+                <br />
+                <div class="form-group">
+                    <asp:Label ID="Label1" runat="server" Text="Nombre de usuario"></asp:Label>
+                    <asp:TextBox ID="UsernameLogin" runat="server" CssClass="form-control"></asp:TextBox>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="Label2" runat="server" Text="Contraseña"></asp:Label>
+                    <asp:TextBox ID="PasswordLogin" runat="server" TextMode="Password" CssClass="form-control"></asp:TextBox>
+                </div>
+                <asp:Button ID="LoginButton" runat="server" Text="Acceder" OnClick="LoginButton_Click" CssClass="btn btn-primary btn-block" />
+            </div>
         </div>
-    </form>
-</body>
-</html>
+    </div>
+</asp:Content>
