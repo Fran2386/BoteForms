@@ -27,7 +27,6 @@ namespace BoteForms
 
             Response.Redirect("~/");
         }
-
         private void InicializarDropDownList()
         {
             ddlNumeroTrabajadores.Items.Clear();

@@ -148,6 +148,7 @@
                 </tr>
             </tbody>
         </table>
+         <asp:Button ID="brnSalir" runat="server" Text="Cerrar sesión" CssClass="btn btn-primary" OnClick="BtnSalir_Click" />
     </div>
 
 </asp:Content>
