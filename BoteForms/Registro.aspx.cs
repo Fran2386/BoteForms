@@ -10,7 +10,7 @@ using BoteForms.modelo;
 
 namespace BoteForms
 {
-    public partial class Register : Page
+    public partial class Registro : Page
     {
         protected void RegisterButton_Click(object sender, EventArgs e)
         {

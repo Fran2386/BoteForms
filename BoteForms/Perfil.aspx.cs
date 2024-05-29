@@ -5,7 +5,7 @@ using System.Web.UI.WebControls;
 
 namespace BoteForms
 {
-    public partial class Preferences : Page
+    public partial class Perfil : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,7 +32,7 @@ namespace BoteForms
         protected void BtnLimpiar_Click(object sender, EventArgs e)
         {
 
-            Response.Redirect("~/Preferences");
+            Response.Redirect("~/Perfil");
         }
 
         private void InicializarDropDownList()

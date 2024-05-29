@@ -19,7 +19,7 @@ namespace BoteForms
                     if (usuario != null)
                     {
                         FormsAuthentication.SetAuthCookie(usuario.NombreUsuario, false);
-                        Response.Redirect("~/Preferences.aspx");
+                        Response.Redirect("~/Perfil.aspx");
                     }
                     else
                     {
