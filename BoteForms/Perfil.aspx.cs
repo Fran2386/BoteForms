@@ -5,6 +5,7 @@ using System.Web.UI.WebControls;
 using System.Collections.Generic;
 using System.Web;
 using System.Linq;
+using System.Web.Security;
 
 namespace BoteForms
 {
@@ -32,6 +33,11 @@ namespace BoteForms
         protected void btnConnect_Click(object sender, EventArgs e)
         {
             ConnectToDatabase();
+        }
+        protected void BtnSalir_Click(object sender, EventArgs e)
+        {
+            FormsAuthentication.SignOut();
+            Response.Redirect("~/");
         }
 
         private void ConnectToDatabase()
