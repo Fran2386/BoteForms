@@ -23,6 +23,7 @@ namespace BoteForms
             }
         }
         protected void BtnCalcularClick(object sender, EventArgs e)
+
         {
             // Obtener el total de horas ingresadas por todos los trabajadores
             int totalHoras = 0;
