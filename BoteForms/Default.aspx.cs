@@ -9,15 +9,7 @@ namespace BoteForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!Page.IsPostBack)
-            {
-                // Deshabilitar la caché del navegador
-                Response.Cache.SetCacheability(HttpCacheability.NoCache);
-                Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
-                Response.Cache.SetNoStore();
-                Session["MiVariable"] = null;
 
-            }
             if (!IsPostBack)
             {
                 // Inicialización que sólo debe ocurrir una vez
@@ -54,18 +46,26 @@ namespace BoteForms
             {
                 TableRow row = new TableRow();
 
+                TableCell cellNumero = new TableCell();
+                Label lblNumero = new Label();
+                lblNumero.ID = "lblNumero_" + i;
+                lblNumero.Text = (i + 1).ToString();
+                lblNumero.CssClass = "form-label";
+                cellNumero.Controls.Add(lblNumero);
+
                 TableCell cellNombre = new TableCell();
-                Label lblTrabajador = new Label();
-                lblTrabajador.ID = "lblTrabajador_" + i;
-                lblTrabajador.Text = "Trabajador " + (i + 1);
-                lblTrabajador.CssClass = "form-label";
-                cellNombre.Controls.Add(lblTrabajador);
+                TextBox txtNombre = new TextBox();
+                txtNombre.ID = "txtNombre_" + i;
+                txtNombre.CssClass = "form-control";
+                txtNombre.Attributes["placeholder"] = "Nombre (Opcional)";
+                cellNombre.Controls.Add(txtNombre);
 
                 TableCell cellHoras = new TableCell();
                 TextBox txtHoras = new TextBox();
                 txtHoras.ID = "txtHoras_" + i;
                 txtHoras.CssClass = "form-control";
                 txtHoras.TextMode = TextBoxMode.Number;
+                txtHoras.Attributes["placeholder"] = "Introduce las horas";
                 txtHoras.Enabled = true;
                 cellHoras.Controls.Add(txtHoras);
 
@@ -75,6 +75,7 @@ namespace BoteForms
                 lblResultado.CssClass = "form-control";
                 cellResultado.Controls.Add(lblResultado);
 
+                row.Cells.Add(cellNumero);
                 row.Cells.Add(cellNombre);
                 row.Cells.Add(cellHoras);
                 row.Cells.Add(cellResultado);
@@ -82,6 +83,7 @@ namespace BoteForms
                 phTrabajadores.Controls.Add(row);
             }
         }
+
 
         protected void ddlNumeroTrabajadores_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -101,7 +103,7 @@ namespace BoteForms
                     {
                         foreach (Control subControl in cell.Controls)
                         {
-                            if (subControl is TextBox txtHoras)
+                            if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
                             {
                                 if (int.TryParse(txtHoras.Text, out int horas))
                                 {
@@ -132,29 +134,42 @@ namespace BoteForms
             {
                 if (control is TableRow row)
                 {
+                    int horasTrabajador = 0;
+                    string trabajadorNombre = string.Empty;
+                    Label lblResultado = null;
+                    int trabajadorNumero = 0;
+
                     foreach (TableCell cell in row.Cells)
                     {
                         foreach (Control subControl in cell.Controls)
                         {
-                            if (subControl is TextBox txtHoras)
+                            if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
                             {
-                                string[] controlID = txtHoras.ID.Split('_');
-                                if (controlID.Length > 1 && int.TryParse(controlID[1], out int index))
+                                string[] controlID = txtNombre.ID.Split('_');
+                                if (controlID.Length > 1 && int.TryParse(controlID[1], out trabajadorNumero))
                                 {
-                                    Label lblResultado = (Label)row.FindControl("lblResultado_" + index);
-
-                                    if (lblResultado != null)
-                                    {
-                                        if (int.TryParse(txtHoras.Text, out int horasTrabajador))
-                                        {
-                                            // Calcular el resultado y mostrarlo en el Label correspondiente al trabajador
-                                            double resultado = (horasTrabajador / (double)totalHoras) * importeBote;
-                                            lblResultado.Text = resultado.ToString("C"); // Muestra el resultado como moneda
-                                        }
-                                    }
+                                    trabajadorNombre = string.IsNullOrEmpty(txtNombre.Text) ? $"Trabajador {trabajadorNumero + 1}" : txtNombre.Text;
                                 }
                             }
+                            else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
+                            {
+                                if (int.TryParse(txtHoras.Text, out int horas))
+                                {
+                                    horasTrabajador = horas;
+                                }
+                            }
+                            else if (subControl is Label label && label.ID != null && label.ID.StartsWith("lblResultado_"))
+                            {
+                                lblResultado = label;
+                            }
                         }
+                    }
+
+                    if (lblResultado != null)
+                    {
+                        // Calcular el resultado y mostrarlo en el Label correspondiente al trabajador
+                        double resultado = (horasTrabajador / (double)totalHoras) * importeBote;
+                        lblResultado.Text = $"{trabajadorNombre}: {resultado.ToString("C")}";
                     }
                 }
             }

@@ -5,7 +5,7 @@
         <div class="col-md-4">
             <h2>Total de bote:</h2>
             <div class="input-group">
-                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" />
+                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" placeholder="Total del bote recaudado"/>
                 <div class="input-group-append">
                     <asp:Button ID="btnCalcular" runat="server" Text="Calcular" CssClass="btn btn-primary" OnClick="BtnCalcularClick" />
                     <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-primary" OnClick="BtnLimpiar_Click" />
@@ -29,8 +29,9 @@
             <thead>
                 <tr>
                     <th>Trabajador</th>
-                    <th>Horas semanales para el cómputo</th>
-                    <th>Bote correspondiente</th>
+                    <th>Nombre</th>
+                    <th>Horas semanales</th>
+                    <th>Importe correspondiente</th>
                 </tr>
             </thead>
             <tbody>
