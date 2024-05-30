@@ -10,6 +10,7 @@ namespace BoteForms.Data
         }
 
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Trabajador> Trabajadores { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

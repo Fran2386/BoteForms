@@ -55,8 +55,8 @@
                         <li><a runat="server" href="~/About">Acerca de</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a runat="server" href="~/Login.aspx">Acceso</a></li>
-                        <li><a runat="server" href="~/Registro.aspx">Registro</a></li>
+                        <li id="liAcceder" runat="server" visible="true"><a runat="server" href="~/Login.aspx">Acceder</a></li>
+                        <li id="liPerfil" runat="server" visible="false"><a runat="server" ID="aPerfil" href="~/Perfil.aspx"></a ></li>
                     </ul>
                 </div>
             </div>

@@ -15,7 +15,10 @@
                     <asp:Label ID="Label2" runat="server" Text="Contraseña"></asp:Label>
                     <asp:TextBox ID="PasswordLogin" runat="server" TextMode="Password" CssClass="form-control"></asp:TextBox>
                 </div>
-                <asp:Button ID="LoginButton" runat="server" Text="Acceder" OnClick="LoginButton_Click" CssClass="btn btn-primary btn-block" />
+                <asp:Button ID="btnLogin" runat="server" Text="Acceder" OnClick="btnLoginClick" CssClass="btn btn-primary btn-block" />
+                <br />
+                <h3>¿Aún no estás registrado?</h3>
+                <asp:Button ID="btnRegistro" runat="server" Text="Registrate aquí" OnClick="btnRegistroClick" CssClass="btn btn-primary btn-block" />
             </div>
         </div>
     </div>

@@ -33,6 +33,7 @@ namespace BoteForms
                         db.SaveChanges();
 
                         RegisterMessage.Text = "Registro exitoso. Ahora puede iniciar sesión.";
+                        Response.Redirect("Login.aspx");
                     }
                     else
                     {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace BoteForms
 {
@@ -11,7 +8,18 @@ namespace BoteForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                if (HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    var nombre = HttpContext.Current.User.Identity.Name;
+                    aPerfil.InnerText = "Bienvenido " + nombre;
+                    liPerfil.Visible = true;
+                    liAcceder.Visible = false;
 
+                }                
+
+            }
         }
     }
 }

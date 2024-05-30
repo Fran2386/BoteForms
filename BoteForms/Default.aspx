@@ -38,6 +38,7 @@
                 <asp:PlaceHolder ID="phTrabajadores" runat="server"></asp:PlaceHolder>
             </tbody>
         </table>
+         <asp:Button ID="btnGuardar" runat="server" Text="Guardar Datos" CssClass="btn btn-primary" OnClick="BtnGuardarClick" />
     </div>
 </asp:Content>
 

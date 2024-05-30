@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using BoteForms.Data;
+using BoteForms.modelo;
 
 namespace BoteForms
 {
@@ -9,7 +12,6 @@ namespace BoteForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
             if (!IsPostBack)
             {
                 // Inicialización que sólo debe ocurrir una vez
@@ -22,11 +24,12 @@ namespace BoteForms
                 CrearControlesTrabajadores(numTrabajadores);
             }
         }
+
         protected void BtnLimpiar_Click(object sender, EventArgs e)
         {
-
             Response.Redirect("~/");
         }
+
         private void InicializarDropDownList()
         {
             ddlNumeroTrabajadores.Items.Clear();
@@ -82,7 +85,6 @@ namespace BoteForms
                 phTrabajadores.Controls.Add(row);
             }
         }
-
 
         protected void ddlNumeroTrabajadores_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -174,5 +176,110 @@ namespace BoteForms
             }
         }
 
+        protected void BtnGuardarClick(object sender, EventArgs e)
+        {
+            int userId = GetUserSessionID();
+
+            using (var db = new AppDbContext())
+            {
+                foreach (Control control in phTrabajadores.Controls)
+                {
+                    if (control is TableRow row)
+                    {
+                        string nombre = string.Empty;
+                        int horas = 0;
+                        decimal ultimoBote = 0;
+
+                        foreach (TableCell cell in row.Cells)
+                        {
+                            foreach (Control subControl in cell.Controls)
+                            {
+                                if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
+                                {
+                                    nombre = txtNombre.Text;
+                                }
+                                else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
+                                {
+                                    int.TryParse(txtHoras.Text, out horas);
+                                }
+                                else if (subControl is Label lblResultado && lblResultado.ID.StartsWith("lblResultado_"))
+                                {
+                                    string[] partes = lblResultado.Text.Split(':');
+                                    if (partes.Length == 2)
+                                    {
+                                        // Eliminar el símbolo del euro y cualquier espacio en blanco adicional
+                                        string importeSinEuro = partes[1].Trim().Replace("€", "");
+
+                                        // Intentar convertir el importe a un número
+                                        if (decimal.TryParse(importeSinEuro,
+                                                             System.Globalization.NumberStyles.Currency,
+                                                             System.Globalization.CultureInfo.CurrentCulture,
+                                                             out decimal resultado))
+                                        {
+                                            ultimoBote = resultado;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        var trabajador = new Trabajador
+                        {
+                            UsuarioID = userId,
+                            Nombre = nombre,
+                            Horas = horas,
+                            UltimoBote = ultimoBote,
+                            BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
+                        };
+
+                        db.Trabajadores.Add(trabajador);
+                    }
+                }
+
+                db.SaveChanges();
+            }
+
+            string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
+            Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+        }
+
+        private decimal BoteAcumulado(decimal bote, string nombre)
+        {
+            using (var db = new AppDbContext())
+            {
+
+                var boteActual = db.Trabajadores
+                                        .Where(t => t.Nombre == nombre)
+                                        .Select(t => t.UltimoBote)
+                                        .FirstOrDefault();
+                if (boteActual != 0)
+                {
+                    decimal boteNuevo = bote + boteActual;
+                    return boteNuevo;
+                }
+                else return 0;
+            }
+        }
+
+
+        private int GetUserSessionID()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                using (var db = new AppDbContext())
+                {
+                    var usuario = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == User.Identity.Name);
+                    if (usuario != null)
+                    {
+                        return usuario.UsuarioID;
+                    }
+                }
+            }
+
+            Response.Redirect("~/Login.aspx");
+            return 0;
+        }
+
     }
 }
+

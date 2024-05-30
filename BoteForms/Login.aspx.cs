@@ -9,7 +9,7 @@ namespace BoteForms
 {
     public partial class Login : Page
     {
-        protected void LoginButton_Click(object sender, EventArgs e)
+        protected void btnLoginClick(object sender, EventArgs e)
         {
             if (Page.IsValid)
             {
@@ -28,5 +28,10 @@ namespace BoteForms
                 }
             }
         }
+        protected void btnRegistroClick(object sender, EventArgs e) 
+        {
+            Response.Redirect("~/Registro.aspx");
+        }
+
     }
 }
