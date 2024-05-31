@@ -188,61 +188,59 @@ namespace BoteForms
 
         protected void BtnGuardarClick(object sender, EventArgs e)
         {
-           // List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;          
             List<Trabajador> listaTrabajadores = new List<Trabajador>();
+
             foreach (Control control in phTrabajadores.Controls)
+            {
+                if (control is TableRow row)
                 {
-                    if (control is TableRow row)
+                    string nombre = string.Empty;
+                    int horas = 0;
+                    decimal ultimoBote = 0;
+
+                    foreach (TableCell cell in row.Cells)
                     {
-                        string nombre = string.Empty;
-                        int horas = 0;
-                        decimal ultimoBote = 0;
-
-                        foreach (TableCell cell in row.Cells)
+                        foreach (Control subControl in cell.Controls)
                         {
-                            foreach (Control subControl in cell.Controls)
+                            if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
                             {
-                                if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
+                                nombre = txtNombre.Text;
+                            }
+                            else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
+                            {
+                                int.TryParse(txtHoras.Text, out horas);
+                            }
+                            else if (subControl is Label lblResultado && lblResultado.ID.StartsWith("lblResultado_"))
+                            {
+                                string[] partes = lblResultado.Text.Split(':');
+                                if (partes.Length == 2)
                                 {
-                                    nombre = txtNombre.Text;
-                                }
-                                else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
-                                {
-                                    int.TryParse(txtHoras.Text, out horas);
-                                }
-                                else if (subControl is Label lblResultado && lblResultado.ID.StartsWith("lblResultado_"))
-                                {
-                                    string[] partes = lblResultado.Text.Split(':');
-                                    if (partes.Length == 2)
-                                    {
-                                        // Eliminar el símbolo del euro y cualquier espacio en blanco adicional
-                                        string importeSinEuro = partes[1].Trim().Replace("€", "");
+                                    // Eliminar el símbolo del euro y cualquier espacio en blanco adicional
+                                    string importeSinEuro = partes[1].Trim().Replace("€", "");
 
-                                        // Intentar convertir el importe a un número
-                                        if (decimal.TryParse(importeSinEuro,
-                                                             System.Globalization.NumberStyles.Currency,
-                                                             System.Globalization.CultureInfo.CurrentCulture,
-                                                             out decimal resultado))
-                                        {
-                                            ultimoBote = resultado;
-                                        }
+                                    // Intentar convertir el importe a un número
+                                    if (decimal.TryParse(importeSinEuro, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal resultado))
+                                    {
+                                        ultimoBote = resultado;
                                     }
                                 }
                             }
                         }
+                    }
 
                     int userId = IDusuarioActivo();
 
+                    var trabajador = new Trabajador
+                    {
+                        UsuarioID = userId,
+                        Nombre = nombre,
+                        Horas = horas,
+                        UltimoBote = ultimoBote,
+                        BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
+                    };
+
                     if (userId == 0)
                     {
-                        var trabajador = new Trabajador
-                        {
-                            Nombre = nombre,
-                            Horas = horas,
-                            UltimoBote = ultimoBote,
-                            BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
-                        };
-
                         // Obtener la lista de trabajadores de la sesión o inicializar una nueva si es null
                         List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;
                         if (listaTrabajadoresTemporal == null)
@@ -253,56 +251,58 @@ namespace BoteForms
 
                         // Agregar el trabajador a la lista
                         listaTrabajadoresTemporal.Add(trabajador);
-
-                        Response.Redirect("~/Login.aspx");
                     }
-
                     else
-                    { 
-
-                        var trabajador = new Trabajador
-                        {
-                            UsuarioID = userId,
-                            Nombre = nombre,
-                            Horas = horas,
-                            UltimoBote = ultimoBote,
-                            BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
-                        };
-
+                    {
                         listaTrabajadores.Add(trabajador);
-                        GuardarListaBBDD guardador = new GuardarListaBBDD();
-                        if (guardador.GuardarUsuarioActivo(listaTrabajadores)) 
-                        {
-                            string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
-                            Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
-                        }
                     }
-                   }
                 }
+            }
 
-               
-            //Session.Remove("Trabajadores"); // Limpiar los datos de la sesión una vez que se han guardado
-
-           
+            if (listaTrabajadores.Count > 0)
+            {
+                GuardarListaBBDD guardador = new GuardarListaBBDD();
+                if (guardador.GuardarUsuarioActivo(listaTrabajadores))
+                {
+                    string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
+                    Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+                }
+            }
+            else
+            {
+                // Si no hay usuarios activos, redirige al login
+                Response.Redirect("~/Login.aspx");
+            }
         }
 
-        public decimal BoteAcumulado(decimal bote, string nombre)
+
+        public decimal BoteAcumulado(decimal ultimoBote, string nombre)
         {
             using (var db = new AppDbContext())
             {
+                var trabajador = db.Trabajadores
+                                   .Where(t => t.Nombre == nombre)
+                                   .Select(t => new { t.BoteAcumulado, t.UltimoBote })
+                                   .FirstOrDefault();
 
-                var boteActual = db.Trabajadores
-                                        .Where(t => t.Nombre == nombre)
-                                        .Select(t => t.UltimoBote)
-                                        .FirstOrDefault();
-                if (boteActual != 0)
+                if (trabajador != null)
                 {
-                    decimal boteNuevo = bote + boteActual;
-                    return boteNuevo;
+                    if (trabajador.BoteAcumulado == 0)
+                    {
+                        return ultimoBote;
+                    }
+                    else
+                    {
+                        return trabajador.BoteAcumulado + ultimoBote;
+                    }
                 }
-                else return 0;
+                else
+                {
+                    return ultimoBote;
+                }
             }
         }
+
 
 
         public int IDusuarioActivo()

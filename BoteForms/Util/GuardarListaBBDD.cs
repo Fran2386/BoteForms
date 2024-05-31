@@ -2,6 +2,7 @@
 using BoteForms.modelo;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Web;
 using System.Web.SessionState;
@@ -18,17 +19,18 @@ namespace BoteForms.Util
         }
 
 
-        public bool GuardarUsuarioActivo(List<Trabajador> trabajador)
+        public bool GuardarUsuarioActivo(List<Trabajador> trabajadores)
         {
             using (var db = new AppDbContext())
             {
-                foreach (var t in trabajador)
+                foreach (var trabajador in trabajadores)
                 {
-                    db.Trabajadores.Add(t); // Asumiendo que tu DbSet se llama Trabajadores
+                    db.Trabajadores.AddOrUpdate(t => new { t.Nombre, t.UsuarioID }, trabajador);
                 }
 
                 db.SaveChanges();
-            }return true;
+            }
+            return true;
         }
 
         public bool GuardarListaTemporal(List<Trabajador> listaTrabajadores, HttpSessionState session, int userId)
@@ -36,7 +38,7 @@ namespace BoteForms.Util
             {
                 using (var db = new AppDbContext())
                 {
-                    _Default instancia = new _Default();                    
+                    _Default instancia = new _Default();
 
                     foreach (var trabajadorTemporal in listaTrabajadores)
                     {
@@ -49,14 +51,14 @@ namespace BoteForms.Util
                             BoteAcumulado = instancia.BoteAcumulado(trabajadorTemporal.UltimoBote, trabajadorTemporal.Nombre),
                         };
 
-                        db.Trabajadores.Add(trabajador);
+                        db.Trabajadores.AddOrUpdate(t => new { t.Nombre, t.UsuarioID }, trabajador);
                     }
 
                     db.SaveChanges();
                 }
                 session.Remove("Trabajadores"); // Limpiar los datos de la sesión una vez que se han guardado 
+                return true;
             }
-            return true;
         }
     }
 }
