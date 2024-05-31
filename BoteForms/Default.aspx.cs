@@ -178,7 +178,7 @@ namespace BoteForms
 
         protected void BtnGuardarClick(object sender, EventArgs e)
         {
-            int userId = GetUserSessionID();
+            int userId = IDusuarioActivo();
 
             using (var db = new AppDbContext())
             {
@@ -262,7 +262,7 @@ namespace BoteForms
         }
 
 
-        private int GetUserSessionID()
+        private int IDusuarioActivo()
         {
             if (User.Identity.IsAuthenticated)
             {
