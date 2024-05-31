@@ -1,15 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BoteForms.Data;
 using BoteForms.modelo;
+using BoteForms.Util;
 
 namespace BoteForms
 {
     public partial class _Default : Page
     {
+        private readonly GuardarListaBBDD guardador;
+
+        public _Default()
+        {
+            guardador = new GuardarListaBBDD(this);
+            // Código de inicialización si es necesario
+        }
+        
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -178,11 +188,9 @@ namespace BoteForms
 
         protected void BtnGuardarClick(object sender, EventArgs e)
         {
-            int userId = IDusuarioActivo();
-
-            using (var db = new AppDbContext())
-            {
-                foreach (Control control in phTrabajadores.Controls)
+           // List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;          
+            List<Trabajador> listaTrabajadores = new List<Trabajador>();
+            foreach (Control control in phTrabajadores.Controls)
                 {
                     if (control is TableRow row)
                     {
@@ -223,6 +231,35 @@ namespace BoteForms
                             }
                         }
 
+                    int userId = IDusuarioActivo();
+
+                    if (userId == 0)
+                    {
+                        var trabajador = new Trabajador
+                        {
+                            Nombre = nombre,
+                            Horas = horas,
+                            UltimoBote = ultimoBote,
+                            BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
+                        };
+
+                        // Obtener la lista de trabajadores de la sesión o inicializar una nueva si es null
+                        List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;
+                        if (listaTrabajadoresTemporal == null)
+                        {
+                            listaTrabajadoresTemporal = new List<Trabajador>();
+                            Session["Trabajadores"] = listaTrabajadoresTemporal;
+                        }
+
+                        // Agregar el trabajador a la lista
+                        listaTrabajadoresTemporal.Add(trabajador);
+
+                        Response.Redirect("~/Login.aspx");
+                    }
+
+                    else
+                    { 
+
                         var trabajador = new Trabajador
                         {
                             UsuarioID = userId,
@@ -232,18 +269,24 @@ namespace BoteForms
                             BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
                         };
 
-                        db.Trabajadores.Add(trabajador);
+                        listaTrabajadores.Add(trabajador);
+                        GuardarListaBBDD guardador = new GuardarListaBBDD();
+                        if (guardador.GuardarUsuarioActivo(listaTrabajadores)) 
+                        {
+                            string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
+                            Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+                        }
                     }
+                   }
                 }
 
-                db.SaveChanges();
-            }
+               
+            //Session.Remove("Trabajadores"); // Limpiar los datos de la sesión una vez que se han guardado
 
-            string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
-            Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+           
         }
 
-        private decimal BoteAcumulado(decimal bote, string nombre)
+        public decimal BoteAcumulado(decimal bote, string nombre)
         {
             using (var db = new AppDbContext())
             {
@@ -262,7 +305,7 @@ namespace BoteForms
         }
 
 
-        private int IDusuarioActivo()
+        public int IDusuarioActivo()
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -275,8 +318,6 @@ namespace BoteForms
                     }
                 }
             }
-
-            Response.Redirect("~/Login.aspx");
             return 0;
         }
 

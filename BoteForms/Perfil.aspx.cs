@@ -27,7 +27,7 @@ namespace BoteForms
         protected void BtnLimpiar_Click(object sender, EventArgs e)
         {
 
-            Response.Redirect("~/Perfil");
+           Response.Redirect("~/Perfil");
         }
 
         protected void btnConnect_Click(object sender, EventArgs e)

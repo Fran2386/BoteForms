@@ -27,5 +27,6 @@ namespace BoteForms.modelo
 
         public virtual Usuario Usuario { get; set; }
     }
+
 }
 
