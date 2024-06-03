@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Web;
 using System.Linq;
 using System.Web.Security;
+using BoteForms.Data;
 
 namespace BoteForms
 {
     public partial class Perfil : Page
     {
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!User.Identity.IsAuthenticated)
@@ -20,164 +22,176 @@ namespace BoteForms
             else
             {
                 MensajeBienvenida.Text = $"Bienvenido, {User.Identity.Name}!";
-             
-            }
-
-        }
-        protected void BtnLimpiar_Click(object sender, EventArgs e)
-        {
-
-           Response.Redirect("~/Perfil");
-        }
-
-        protected void btnConnect_Click(object sender, EventArgs e)
-        {
-            ConnectToDatabase();
-        }
-        protected void BtnSalir_Click(object sender, EventArgs e)
-        {
-            FormsAuthentication.SignOut();
-            Response.Redirect("~/");
-        }
-
-        private void ConnectToDatabase()
-        {
-            // Obtener la cadena de conexión desde el archivo web.config
-            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["CalculadoraBoteDB"].ConnectionString;
-
-            // Intentar abrir una conexión a la base de datos
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                if (!IsPostBack)
                 {
-                    connection.Open();
-                    lblMessage.Text = "Conexión exitosa a la base de datos.";
+                    CargarTrabajadores();
+                }
+                else
+                {
+                    CargarTrabajadores();
                 }
             }
-            catch (Exception ex)
-            {
-                lblMessage.Text = "Error al intentar conectar a la base de datos: " + ex.Message;
-            }
         }
-        protected void chkHabilitarTextBox(object sender, EventArgs e)
+
+        private void CargarTrabajadores()
         {
-            txtAni.Enabled = chkAni.Checked;
-            txtCris.Enabled = chkCris.Checked;
-            txtDiana.Enabled = chkDiana.Checked;
-            txtFran.Enabled = chkFran.Checked;
-            txtMarina.Enabled = chkMarina.Checked;
-            txtVictor.Enabled = chkVictor.Checked;
-            txtYoli.Enabled = chkYoli.Checked;
-            txtExtra1.Enabled = chkExtra1.Checked;
-            txtExtra2.Enabled = chkExtra2.Checked;
+            using (var db = new AppDbContext())
+            {
+                var usuarioActual = IDusuarioActivo();
+                if (usuarioActual != 0)
+                {
+
+                    var trabajadores = db.Trabajadores.Where(t => t.UsuarioID == usuarioActual).ToList();
+                    foreach (var trabajador in trabajadores)
+                    {
+                        var row = new TableRow();
+
+                        var chkCell = new TableCell();
+                        var chkTrabajador = new CheckBox
+                        {
+                            ID = "chk" + trabajador.Nombre,
+                            Text = trabajador.Nombre,
+                            CssClass = "checkbox",
+                            AutoPostBack = true
+                        };
+                        chkTrabajador.CheckedChanged += new EventHandler(chkHabilitarTextBox);
+                        chkCell.Controls.Add(chkTrabajador);
+
+                        var txtCell = new TableCell();
+                        var txtTrabajador = new TextBox
+                        {
+                            ID = "txt" + trabajador.Nombre,
+                            CssClass = "form-control",
+                            Enabled = false,
+                            TextMode = TextBoxMode.Number,
+                            AutoPostBack = true
+                        };
+                        txtCell.Controls.Add(txtTrabajador);
+
+                        var lblCell = new TableCell();
+                        var lblTrabajador = new Label
+                        {
+                            ID = "lbl" + trabajador.Nombre,
+                            CssClass = "form-control"
+                        };
+                        lblCell.Controls.Add(lblTrabajador);
+
+                        row.Cells.Add(chkCell);
+                        row.Cells.Add(txtCell);
+                        row.Cells.Add(lblCell);
+
+                        phTrabajadores.Controls.Add(row);
+                    }
+                }
+            }
         }
 
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
             Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
 
-            // Verificar y convertir los valores de los TextBox que tienen CheckBox marcados
-            if (chkAni.Checked && int.TryParse(txtAni.Text, out int hrsAni))
+            using (var db = new AppDbContext())
             {
-                valoresTrabajadores["Ani"] = hrsAni;
-            }
-            if (chkCris.Checked && int.TryParse(txtCris.Text, out int hrsCris))
-            {
-                valoresTrabajadores["Cris"] = hrsCris;
-            }
-            if (chkDiana.Checked && int.TryParse(txtDiana.Text, out int hrsDiana))
-            {
-                valoresTrabajadores["Diana"] = hrsDiana;
-            }
-            if (chkFran.Checked && int.TryParse(txtFran.Text, out int hrsFran))
-            {
-                valoresTrabajadores["Fran"] = hrsFran;
-            }
-            if (chkMarina.Checked && int.TryParse(txtMarina.Text, out int hrsMarina))
-            {
-                valoresTrabajadores["Marina"] = hrsMarina;
-            }
-            if (chkVictor.Checked && int.TryParse(txtVictor.Text, out int hrsVictor))
-            {
-                valoresTrabajadores["Victor"] = hrsVictor;
-            }
-            if (chkYoli.Checked && int.TryParse(txtYoli.Text, out int hrsYoli))
-            {
-                valoresTrabajadores["Yoli"] = hrsYoli;
-            }
-            if (chkExtra1.Checked && int.TryParse(txtExtra1.Text, out int hrsExtra1))
-            {
-                valoresTrabajadores["Extra1"] = hrsExtra1;
-            }
-            if (chkExtra2.Checked && int.TryParse(txtExtra2.Text, out int hrsExtra2))
-            {
-                valoresTrabajadores["Extra2"] = hrsExtra2;
-            }
-
-            // Calcular cashXHora basado en la suma de todas las horas trabajadas
-            int totalHorasTrabajadores = valoresTrabajadores.Values.Sum();
-
-            if (totalHorasTrabajadores > 0 && int.TryParse(txtBote.Text, out int valorEntero))
-            {
-                double cashXHora = (double)valorEntero / totalHorasTrabajadores;
-
-                // Multiplicar cashXHora por cada valor en el diccionario
-                Dictionary<string, double> resultados = new Dictionary<string, double>();
-                foreach (var trabajador in valoresTrabajadores)
+                var usuarioActual = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == User.Identity.Name);
+                if (usuarioActual != null)
                 {
-                    resultados[trabajador.Key] = cashXHora * trabajador.Value;
-                }
+                    var trabajadores = db.Trabajadores.Where(t => t.UsuarioID == usuarioActual.UsuarioID).ToList();
 
-                // Mostrar los resultados en los Labels correspondientes con el símbolo de euro
-                foreach (var resultado in resultados)
-                {
-                    string resultadoConSimbolo = resultado.Value.ToString("F2") + " €";
-                    switch (resultado.Key)
+                    foreach (TableRow row in phTrabajadores.Controls)
                     {
-                        case "Ani":
-                            lblAni.Text = resultadoConSimbolo;
-                            break;
-                        case "Cris":
-                            lblCris.Text = resultadoConSimbolo;
-                            break;
-                        case "Diana":
-                            lblDiana.Text = resultadoConSimbolo;
-                            break;
-                        case "Fran":
-                            lblFran.Text = resultadoConSimbolo;
-                            break;
-                        case "Marina":
-                            lblMarina.Text = resultadoConSimbolo;
-                            break;
-                        case "Victor":
-                            lblVictor.Text = resultadoConSimbolo;
-                            break;
-                        case "Yoli":
-                            lblYoli.Text = resultadoConSimbolo;
-                            break;
-                        case "Extra1":
-                            lblExtra1.Text = resultadoConSimbolo;
-                            break;
-                        case "Extra2":
-                            lblExtra2.Text = resultadoConSimbolo;
-                            break;
+                        string nombreTrabajador = null;
+                        int horasTrabajadas = 0;
+
+                        foreach (TableCell cell in row.Cells)
+                        {
+                            foreach (Control innerControl in cell.Controls)
+                            {
+                                if (innerControl is CheckBox chk && chk.ID.StartsWith("chk"))
+                                {
+                                    nombreTrabajador = chk.ID.Substring(3);
+                                }
+                                else if (innerControl is TextBox txt && txt.ID.StartsWith("txt") && nombreTrabajador != null)
+                                {
+                                    // Comprobamos si el CheckBox correspondiente está marcado
+                                    CheckBox chkControl = row.FindControl("chk" + nombreTrabajador) as CheckBox;
+                                    if (chkControl != null && chkControl.Checked)
+                                    {
+                                        // Solo consideramos el valor del TextBox si el CheckBox está marcado
+                                        if (int.TryParse(txt.Text, out horasTrabajadas))
+                                        {
+                                            valoresTrabajadores[nombreTrabajador] = horasTrabajadas;
+                                        }
+                                        var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
+                                        if (trabajador != null)
+                                        {
+                                            trabajador.Horas = horasTrabajadas;
+                                            db.SaveChanges();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Aquí calculamos el resultado para cada trabajador y lo almacenamos en un diccionario
+                    int totalHorasTrabajadores = valoresTrabajadores.Values.Sum();
+                    var resultados = new Dictionary<string, double>();
+
+                    if (totalHorasTrabajadores > 0 && int.TryParse(txtBote.Text, out int valorEntero))
+                    {
+                        double cashXHora = (double)valorEntero / totalHorasTrabajadores;
+
+                        foreach (var trabajador in valoresTrabajadores)
+                        {
+                            resultados[trabajador.Key] = cashXHora * trabajador.Value;
+                        }
+                    }
+                    // Finalmente, actualizamos los Labels con los resultados calculados
+                    foreach (TableRow row in phTrabajadores.Controls)
+                    {
+                        foreach (TableCell cell in row.Cells)
+                        {
+                            foreach (Control innerControl in cell.Controls)
+                            {
+                                if (innerControl is Label lbl && lbl.ID.StartsWith("lbl"))
+                                {
+                                    string nombreTrabajador = lbl.ID.Substring(3);
+                                    string resultadoConSimbolo = resultados.ContainsKey(nombreTrabajador) ? resultados[nombreTrabajador].ToString("F2") + " €" : string.Empty;
+                                    lbl.Text = resultadoConSimbolo;
+
+                                  /*  var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
+                                    if (trabajador != null)
+                                    {
+                                        trabajador.UltimoBote = resultados.ContainsKey(nombreTrabajador);
+                                        db.SaveChanges();
+                                    }*/
+                                }
+                            }
+                        }
                     }
                 }
             }
-            else
+        }
+
+        protected void chkHabilitarTextBox(object sender, EventArgs e)
+        {
+            CheckBox chk = sender as CheckBox;
+            if (chk != null)
             {
-                // Manejar el caso en el que txtBote no contenga un número entero válido o totalHorasTrabajadores sea 0
-                if (txtBote.Text == "")
+                foreach (Control control in phTrabajadores.Controls)
                 {
-                    txtBote.Attributes["placeholder"] = "Por favor introduce el monto del bote";
-                }
-                else
-                {
-                    foreach (var textBox in new List<TextBox> { txtAni, txtCris, txtDiana, txtFran, txtMarina, txtVictor, txtYoli, txtExtra1, txtExtra2 })
+                    if (control is TableRow row)
                     {
-                        if (string.IsNullOrEmpty(textBox.Text))
+                        foreach (TableCell cell in row.Cells)
                         {
-                            textBox.Attributes["placeholder"] = "Introduce las horas";
+                            foreach (Control innerControl in cell.Controls)
+                            {
+                                if (innerControl is TextBox txt && txt.ID == "txt" + chk.Text)
+                                {
+                                    txt.Enabled = chk.Checked;
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
@@ -185,122 +199,74 @@ namespace BoteForms
         }
 
 
+        protected void BtnLimpiar_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/Perfil.aspx");
+        }
 
-
-
-
-
-
+        protected void BtnSalir_Click(object sender, EventArgs e)
+        {
+            FormsAuthentication.SignOut();
+            Response.Redirect("~/");
+        }
 
         protected void RadioButttonSeleccionado(object sender, EventArgs e)
         {
-            // Cast sender to RadioButton
             RadioButton selectedRadioButton = sender as RadioButton;
             if (selectedRadioButton == null) return;
 
-            // Switch based on the RadioButton ID
-            switch (selectedRadioButton.ID)
+            using (var db = new AppDbContext())
             {
-                case "hrsPredefinidas":
-                    SetHorasPredefinidas();
-                    break;
-
-                case "hrsEditables":
-                    SetHorasEditables();
-                    break;
-            }
-        }
-
-        private void SetHorasPredefinidas()
-        {
-            txtAni.Text = "50";
-            txtAni.Attributes.Remove("placeholder");
-            txtCris.Text = "50";
-            txtCris.Attributes.Remove("placeholder");
-            txtDiana.Text = "40";
-            txtDiana.Attributes.Remove("placeholder");
-            txtFran.Text = "50";
-            txtFran.Attributes.Remove("placeholder");
-            txtMarina.Text = "";
-            txtMarina.Attributes.Remove("placeholder");
-            txtVictor.Text = "50";
-            txtVictor.Attributes.Remove("placeholder");
-            txtYoli.Text = "30";
-            txtYoli.Attributes.Remove("placeholder");
-            txtExtra1.Text = "";
-            txtExtra1.Attributes.Remove("placeholder");
-            txtExtra2.Text = "";
-            txtExtra2.Attributes.Remove("placeholder");
-        }
-
-        private void SetHorasEditables()
-        {
-            txtAni.Text = "";
-            txtAni.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtCris.Text = "";
-            txtCris.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtDiana.Text = "";
-            txtDiana.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtFran.Text = "";
-            txtFran.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtMarina.Text = "";
-            txtMarina.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtVictor.Text = "";
-            txtVictor.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtYoli.Text = "";
-            txtYoli.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtExtra1.Text = "";
-            txtExtra1.Attributes["placeholder"] = "Introduce las horas a computar";
-            txtExtra2.Text = "";
-            txtExtra2.Attributes["placeholder"] = "Introduce las horas a computar";
-        }
-
-        private void CalculoBote(List<int> valoresEnteros)
-        {
-            // Inicializa la variable totalHorasTrabajadores
-            int totalHorasTrabajadores = 0;
-
-            // Suma todos los valores de la lista
-            foreach (int valor in valoresEnteros)
-            {
-                totalHorasTrabajadores += valor;
-            }
-
-            // Ahora totalHorasTrabajadores contiene la suma de todos los valores en la lista
-
-            if (txtBote == null || string.IsNullOrEmpty(txtBote.Text))
-            {
-                txtBote.Attributes["placeholder"] = "Por favor introduce el monto del bote";
-            }
-            else
-            {
-                int valorEntero;
-                if (!int.TryParse(txtBote.Text, out valorEntero))
+                var usuarioActual = IDusuarioActivo();
+                if (usuarioActual != 0)
                 {
-                    txtBote.Attributes["placeholder"] = "El valor ingresado no es válido";
-                    // También puedes mostrar un mensaje de error adicional, o realizar otra acción según sea necesario
-                }
-                else
-                {
-                    double cashXHora = (double)valorEntero / totalHorasTrabajadores;
-
-                    double[] resultados = new double[valoresEnteros.Count];
-
-                    for (int i = 0; i < valoresEnteros.Count; i++)
+                    var trabajadores = db.Trabajadores.Where(t => t.UsuarioID == usuarioActual).ToList();
+                    foreach (Control control in phTrabajadores.Controls)
                     {
-                        resultados[i] = cashXHora * valoresEnteros[i];
+                        if (control is TableRow row)
+                        {
+                            foreach (TableCell cell in row.Cells)
+                            {
+                                foreach (Control innerControl in cell.Controls)
+                                {
+                                    if (innerControl is TextBox txt)
+                                    {
+                                        // Obtener el nombre del trabajador asociado al TextBox
+                                        string nombreTrabajador = txt.ID.Substring(3); // Suponiendo que el ID del TextBox es "txtNombreTrabajador"
+
+                                        // Buscar el trabajador en la lista
+                                        var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
+                                        if (trabajador != null)
+                                        {
+                                            // Asignar las horas del trabajador al TextBox
+                                            txt.Text = trabajador.Horas.ToString();
+                                            txt.Attributes.Remove("placeholder");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-
-                    // Aquí puedes usar los valores en el arreglo resultados como necesites
-
-
-
                 }
             }
-
-
-
         }
 
+        public int IDusuarioActivo()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                using (var db = new AppDbContext())
+                {
+                    var usuario = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == User.Identity.Name);
+                    if (usuario != null)
+                    {
+                        return usuario.UsuarioID;
+                    }
+                }
+            }
+            return 0;
+        }
     }
 }
+
+
