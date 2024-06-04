@@ -7,11 +7,13 @@ using System.Web;
 using System.Linq;
 using System.Web.Security;
 using BoteForms.Data;
+using System.Data.Entity.Migrations;
 
 namespace BoteForms
-{
+{   
     public partial class Perfil : Page
     {
+        _Default Default = new _Default();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -158,13 +160,14 @@ namespace BoteForms
                                     string nombreTrabajador = lbl.ID.Substring(3);
                                     string resultadoConSimbolo = resultados.ContainsKey(nombreTrabajador) ? resultados[nombreTrabajador].ToString("F2") + " €" : string.Empty;
                                     lbl.Text = resultadoConSimbolo;
+                                    var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
 
-                                  /*  var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
-                                    if (trabajador != null)
-                                    {
-                                        trabajador.UltimoBote = resultados.ContainsKey(nombreTrabajador);
-                                        db.SaveChanges();
-                                    }*/
+                                    var ultimoBote = resultados.ContainsKey(nombreTrabajador) ? (decimal)resultados[nombreTrabajador] : 0;
+                                    decimal boteAcumulado = Default.BoteAcumulado(ultimoBote, nombreTrabajador);
+                                    trabajador.UltimoBote = ultimoBote;
+                                    trabajador.BoteAcumulado = boteAcumulado;
+                                    db.Trabajadores.AddOrUpdate(t => new { t.UltimoBote, t.BoteAcumulado });
+                                    db.SaveChanges();
                                 }
                             }
                         }
