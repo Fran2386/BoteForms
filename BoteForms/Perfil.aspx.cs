@@ -65,9 +65,13 @@ namespace BoteForms
                             ID = "txt" + trabajador.Nombre,
                             CssClass = "form-control",
                             Enabled = false,
-                            TextMode = TextBoxMode.Number,
+                            TextMode = TextBoxMode.Number,                          
                             AutoPostBack = true
                         };
+                        txtTrabajador.Attributes.Add("min", "1");
+                        txtTrabajador.Attributes.Add("max", "168");
+                        txtTrabajador.Attributes.Add("required", "true");
+                        txtTrabajador.Attributes.Add("placeholder", "Introduce las horas");
                         txtCell.Controls.Add(txtTrabajador);
 
                         var lblCell = new TableCell();
@@ -90,6 +94,35 @@ namespace BoteForms
 
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
+            bool algunCheckMarcado = false;
+
+            // Comprobar si hay al menos un CheckBox marcado
+            foreach (TableRow row in phTrabajadores.Controls)
+            {
+                foreach (TableCell cell in row.Cells)
+                {
+                    foreach (Control innerControl in cell.Controls)
+                    {
+                        if (innerControl is CheckBox chk && chk.Checked)
+                        {
+                            algunCheckMarcado = true;
+                            break;
+                        }
+                    }
+                    if (algunCheckMarcado) break;
+                }
+                if (algunCheckMarcado) break;
+            }
+
+            // Si no hay ningún CheckBox marcado, salir del método
+            if (!algunCheckMarcado)
+            {
+                // Opción: Mostrar un mensaje al usuario indicando que debe marcar al menos un CheckBox
+                lblMensaje.Text = "Debes marcar al menos un trabajador.";
+                lblMensaje.Visible = true;
+                return;
+            }
+            lblMensaje.Visible = false;
             Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
 
             using (var db = new AppDbContext())

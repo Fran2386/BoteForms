@@ -9,11 +9,7 @@
         <div class="col-md-4">
             <h2>Total de bote:</h2>
             <div class="input-group">
-                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" />
-                <div class="input-group-append">
-                    <asp:Button ID="btnCalcular" runat="server" Text="Calcular" CssClass="btn btn-primary" OnClick="BtnCalcularClick" />
-                    <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-primary" OnClick="BtnLimpiar_Click" />
-                </div>
+                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" min="1" max="1000000" required="true" placeholder="Total del bote recaudado"/>               
             </div>
         </div>
     </div>
@@ -44,6 +40,12 @@
                 <asp:PlaceHolder ID="phTrabajadores" runat="server"></asp:PlaceHolder>
             </tbody>
         </table> 
+             <div class="input-group-append">
+                    <asp:Button ID="btnCalcular" runat="server" Text="Calcular" CssClass="btn btn-primary" OnClick="BtnCalcularClick" />
+                    <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-primary" OnClick="BtnLimpiar_Click" /><br />
+                 <asp:Label runat="server" ID="lblMensaje" Visible="false" ForeColor="Red"></asp:Label>
+                </div>
+            <br />
             <asp:Button ID="brnSalir" runat="server" Text="Cerrar sesión" CssClass="btn btn-primary" OnClick="BtnSalir_Click" />
     </div>            
 </asp:Content>
