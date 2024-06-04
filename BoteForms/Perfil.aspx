@@ -46,6 +46,7 @@
                  <asp:Label runat="server" ID="lblMensaje" Visible="false" ForeColor="Red"></asp:Label>
                 </div>
             <br />
+            <asp:Button ID="btnHistorial" runat="server" Text="Ver historial de propinas" CssClass="btn btn-primary" OnClick="BtnHistorial_Click" />
             <asp:Button ID="brnSalir" runat="server" Text="Cerrar sesión" CssClass="btn btn-primary" OnClick="BtnSalir_Click" />
     </div>            
 </asp:Content>

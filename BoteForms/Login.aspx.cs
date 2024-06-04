@@ -13,8 +13,8 @@ namespace BoteForms
     public partial class Login : Page
     {
         protected void btnLoginClick(object sender, EventArgs e)
-        {
-            if (Page.IsValid)
+        {         
+                if (Page.IsValid)
             {
                 using (var db = new AppDbContext())
                 {
@@ -52,10 +52,12 @@ namespace BoteForms
                             return; // Importante: detener la ejecución para evitar redirecciones múltiples
                         }
                     }
-                    else
+                    else if (string.IsNullOrEmpty(UsernameLogin.Text) && string.IsNullOrEmpty(PasswordLogin.Text))
                     {
-                        LoginErrorMessage.Text = "Nombre de usuario o contraseña incorrectos.";
-                    }
+                        LoginErrorMessage.Text = "Por favor rellene los datos";
+
+                    } else LoginErrorMessage.Text = "Nombre de usuario o contraseña incorrectos.";
+
                 }
             }
         }

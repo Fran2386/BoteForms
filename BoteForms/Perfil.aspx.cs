@@ -246,6 +246,11 @@ namespace BoteForms
             Response.Redirect("~/");
         }
 
+        protected void BtnHistorial_Click(object sender, EventArgs e) 
+        {
+            Response.Redirect("~/Historial.aspx");
+        }
+
         protected void RadioButttonSeleccionado(object sender, EventArgs e)
         {
             RadioButton selectedRadioButton = sender as RadioButton;
