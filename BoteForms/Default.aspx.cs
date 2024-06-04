@@ -81,8 +81,7 @@ namespace BoteForms
                 txtHoras.CssClass = "form-control";
                 txtHoras.TextMode = TextBoxMode.Number;
                 txtHoras.Attributes["min"] = "1"; 
-                txtHoras.Attributes["max"] = "168"; 
-                txtHoras.Attributes["required"] = "true";
+                txtHoras.Attributes["max"] = "168";                 
                 txtHoras.Attributes["placeholder"] = "Introduce las horas";
                 txtHoras.Enabled = true;
                 cellHoras.Controls.Add(txtHoras);
@@ -114,8 +113,9 @@ namespace BoteForms
 
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
-            // Obtener el total de horas ingresadas por todos los trabajadores
-            int totalHoras = 0;
+            if (ComprobarVacio()) { 
+                // Obtener el total de horas ingresadas por todos los trabajadores
+                int totalHoras = 0;
             foreach (Control control in phTrabajadores.Controls)
             {
                 if (control is TableRow row)
@@ -195,103 +195,107 @@ namespace BoteForms
                 }
             }
         }
+     }
 
         protected void BtnGuardarClick(object sender, EventArgs e)
         {
-            List<Trabajador> listaTrabajadores = new List<Trabajador>();
-
-            foreach (Control control in phTrabajadores.Controls)
+            if (ComprobarVacio())
             {
-                if (control is TableRow row)
+                List<Trabajador> listaTrabajadores = new List<Trabajador>();
+
+                foreach (Control control in phTrabajadores.Controls)
                 {
-                    string nombre = string.Empty;
-                    int horas = 0;
-                    decimal ultimoBote = 0;
-
-                    foreach (TableCell cell in row.Cells)
+                    if (control is TableRow row)
                     {
-                        foreach (Control subControl in cell.Controls)
-                        {
-                            if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
-                            {
-                                nombre = txtNombre.Text;
-                            }
-                            else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
-                            {
-                                int.TryParse(txtHoras.Text, out horas);
-                            }
-                            else if (subControl is Label lblResultado && lblResultado.ID.StartsWith("lblResultado_"))
-                            {
-                                string[] partes = lblResultado.Text.Split(':');
-                                if (partes.Length == 2)
-                                {
-                                    // Eliminar el símbolo del euro y cualquier espacio en blanco adicional
-                                    string importeSinEuro = partes[1].Trim().Replace("€", "");
+                        string nombre = string.Empty;
+                        int horas = 0;
+                        decimal ultimoBote = 0;
 
-                                    // Intentar convertir el importe a un número
-                                    if (decimal.TryParse(importeSinEuro, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal resultado))
+                        foreach (TableCell cell in row.Cells)
+                        {
+                            foreach (Control subControl in cell.Controls)
+                            {
+                                if (subControl is TextBox txtNombre && txtNombre.ID.StartsWith("txtNombre_"))
+                                {
+                                    nombre = txtNombre.Text;
+                                }
+                                else if (subControl is TextBox txtHoras && txtHoras.ID.StartsWith("txtHoras_"))
+                                {
+                                    int.TryParse(txtHoras.Text, out horas);
+                                }
+                                else if (subControl is Label lblResultado && lblResultado.ID.StartsWith("lblResultado_"))
+                                {
+                                    string[] partes = lblResultado.Text.Split(':');
+                                    if (partes.Length == 2)
                                     {
-                                        ultimoBote = resultado;
+                                        // Eliminar el símbolo del euro y cualquier espacio en blanco adicional
+                                        string importeSinEuro = partes[1].Trim().Replace("€", "");
+
+                                        // Intentar convertir el importe a un número
+                                        if (decimal.TryParse(importeSinEuro, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal resultado))
+                                        {
+                                            ultimoBote = resultado;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    int userId = IDusuarioActivo();
+                        int userId = IDusuarioActivo();
 
-                    var trabajador = new Trabajador
-                    {
-                        UsuarioID = userId,
-                        Nombre = nombre,
-                        Horas = horas,
-                        UltimoBote = ultimoBote,
-                        BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
-                    };
-
-                    if (userId == 0)
-                    {
-                        // Obtener la lista de trabajadores de la sesión o inicializar una nueva si es null
-                        List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;
-                        if (listaTrabajadoresTemporal == null)
+                        var trabajador = new Trabajador
                         {
-                            listaTrabajadoresTemporal = new List<Trabajador>();
-                            Session["Trabajadores"] = listaTrabajadoresTemporal;
+                            UsuarioID = userId,
+                            Nombre = nombre,
+                            Horas = horas,
+                            UltimoBote = ultimoBote,
+                            BoteAcumulado = BoteAcumulado(ultimoBote, nombre),
+                        };
+
+                        if (userId == 0)
+                        {
+                            // Obtener la lista de trabajadores de la sesión o inicializar una nueva si es null
+                            List<Trabajador> listaTrabajadoresTemporal = Session["Trabajadores"] as List<Trabajador>;
+                            if (listaTrabajadoresTemporal == null)
+                            {
+                                listaTrabajadoresTemporal = new List<Trabajador>();
+                                Session["Trabajadores"] = listaTrabajadoresTemporal;
+                            }
+
+                            // Agregar el trabajador a la lista
+                            listaTrabajadoresTemporal.Add(trabajador);
                         }
-
-                        // Agregar el trabajador a la lista
-                        listaTrabajadoresTemporal.Add(trabajador);
-                    }
-                    else
-                    {
-                        listaTrabajadores.Add(trabajador);
+                        else
+                        {
+                            listaTrabajadores.Add(trabajador);
+                        }
                     }
                 }
-            }
 
-            if (listaTrabajadores.Count > 0)
-            {
-                GuardarListaBBDD guardador = new GuardarListaBBDD();
-                if (guardador.GuardarUsuarioActivo(listaTrabajadores))
+                if (listaTrabajadores.Count > 0)
                 {
-                    string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
-                    Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+                    GuardarListaBBDD guardador = new GuardarListaBBDD();
+                    if (guardador.GuardarUsuarioActivo(listaTrabajadores))
+                    {
+                        string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
+                        Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
+                    }
                 }
-            }
-            else
-            {
-                // Si no hay usuarios activos, redirige al login
-                Response.Redirect("~/Login.aspx");
+                else
+                {
+                    // Si no hay usuarios activos, redirige al login
+                    Response.Redirect("~/Login.aspx");
+                }
             }
         }
-
 
         public decimal BoteAcumulado(decimal ultimoBote, string nombre)
         {
             using (var db = new AppDbContext())
             {
+                var usuarioIdActivo = IDusuarioActivo();
                 var trabajador = db.Trabajadores
-                                   .Where(t => t.Nombre == nombre)
+                                   .Where(t => t.Nombre == nombre && t.UsuarioID == usuarioIdActivo)
                                    .Select(t => new { t.BoteAcumulado, t.UltimoBote })
                                    .FirstOrDefault();
 
@@ -311,6 +315,16 @@ namespace BoteForms
                     return ultimoBote;
                 }
             }
+        }
+
+        public bool ComprobarVacio() 
+        {
+            if (string.IsNullOrEmpty(txtBote.Text)) 
+            {
+                lblErrorBote.Text = "Este campo no puede estar vacío";
+                return false;
+            }
+            return true;
         }
 
         public int IDusuarioActivo()

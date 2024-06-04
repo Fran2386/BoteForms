@@ -12,9 +12,7 @@ using System.Data.Entity.Migrations;
 namespace BoteForms
 {   
     public partial class Perfil : Page
-    {
-        _Default Default = new _Default();
-
+    {       
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!User.Identity.IsAuthenticated)
@@ -69,8 +67,7 @@ namespace BoteForms
                             AutoPostBack = true
                         };
                         txtTrabajador.Attributes.Add("min", "1");
-                        txtTrabajador.Attributes.Add("max", "168");
-                        txtTrabajador.Attributes.Add("required", "true");
+                        txtTrabajador.Attributes.Add("max", "168");                        
                         txtTrabajador.Attributes.Add("placeholder", "Introduce las horas");
                         txtCell.Controls.Add(txtTrabajador);
 
@@ -94,113 +91,116 @@ namespace BoteForms
 
         protected void BtnCalcularClick(object sender, EventArgs e)
         {
-            bool algunCheckMarcado = false;
-
-            // Comprobar si hay al menos un CheckBox marcado
-            foreach (TableRow row in phTrabajadores.Controls)
+            if (ComprobarVacio())
             {
-                foreach (TableCell cell in row.Cells)
+                bool algunCheckMarcado = false;
+
+                // Comprobar si hay al menos un CheckBox marcado
+                foreach (TableRow row in phTrabajadores.Controls)
                 {
-                    foreach (Control innerControl in cell.Controls)
+                    foreach (TableCell cell in row.Cells)
                     {
-                        if (innerControl is CheckBox chk && chk.Checked)
+                        foreach (Control innerControl in cell.Controls)
                         {
-                            algunCheckMarcado = true;
-                            break;
+                            if (innerControl is CheckBox chk && chk.Checked)
+                            {
+                                algunCheckMarcado = true;
+                                break;
+                            }
                         }
+                        if (algunCheckMarcado) break;
                     }
                     if (algunCheckMarcado) break;
                 }
-                if (algunCheckMarcado) break;
-            }
 
-            // Si no hay ningún CheckBox marcado, salir del método
-            if (!algunCheckMarcado)
-            {
-                // Opción: Mostrar un mensaje al usuario indicando que debe marcar al menos un CheckBox
-                lblMensaje.Text = "Debes marcar al menos un trabajador.";
-                lblMensaje.Visible = true;
-                return;
-            }
-            lblMensaje.Visible = false;
-            Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
-
-            using (var db = new AppDbContext())
-            {
-                var usuarioActual = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == User.Identity.Name);
-                if (usuarioActual != null)
+                // Si no hay ningún CheckBox marcado, salir del método
+                if (!algunCheckMarcado)
                 {
-                    var trabajadores = db.Trabajadores.Where(t => t.UsuarioID == usuarioActual.UsuarioID).ToList();
+                    // Opción: Mostrar un mensaje al usuario indicando que debe marcar al menos un CheckBox
+                    lblMensaje.Text = "Debes marcar al menos un trabajador.";
+                    lblMensaje.Visible = true;
+                    return;
+                }
+                lblMensaje.Visible = false;
+                Dictionary<string, int> valoresTrabajadores = new Dictionary<string, int>();
 
-                    foreach (TableRow row in phTrabajadores.Controls)
+                using (var db = new AppDbContext())
+                {
+                    var usuarioActual = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == User.Identity.Name);
+                    if (usuarioActual != null)
                     {
-                        string nombreTrabajador = null;
-                        int horasTrabajadas = 0;
+                        var trabajadores = db.Trabajadores.Where(t => t.UsuarioID == usuarioActual.UsuarioID).ToList();
 
-                        foreach (TableCell cell in row.Cells)
+                        foreach (TableRow row in phTrabajadores.Controls)
                         {
-                            foreach (Control innerControl in cell.Controls)
+                            string nombreTrabajador = null;
+                            int horasTrabajadas = 0;
+
+                            foreach (TableCell cell in row.Cells)
                             {
-                                if (innerControl is CheckBox chk && chk.ID.StartsWith("chk"))
+                                foreach (Control innerControl in cell.Controls)
                                 {
-                                    nombreTrabajador = chk.ID.Substring(3);
-                                }
-                                else if (innerControl is TextBox txt && txt.ID.StartsWith("txt") && nombreTrabajador != null)
-                                {
-                                    // Comprobamos si el CheckBox correspondiente está marcado
-                                    CheckBox chkControl = row.FindControl("chk" + nombreTrabajador) as CheckBox;
-                                    if (chkControl != null && chkControl.Checked)
+                                    if (innerControl is CheckBox chk && chk.ID.StartsWith("chk"))
                                     {
-                                        // Solo consideramos el valor del TextBox si el CheckBox está marcado
-                                        if (int.TryParse(txt.Text, out horasTrabajadas))
+                                        nombreTrabajador = chk.ID.Substring(3);
+                                    }
+                                    else if (innerControl is TextBox txt && txt.ID.StartsWith("txt") && nombreTrabajador != null)
+                                    {
+                                        // Comprobamos si el CheckBox correspondiente está marcado
+                                        CheckBox chkControl = row.FindControl("chk" + nombreTrabajador) as CheckBox;
+                                        if (chkControl != null && chkControl.Checked)
                                         {
-                                            valoresTrabajadores[nombreTrabajador] = horasTrabajadas;
-                                        }
-                                        var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
-                                        if (trabajador != null)
-                                        {
-                                            trabajador.Horas = horasTrabajadas;
-                                            db.SaveChanges();
+                                            // Solo consideramos el valor del TextBox si el CheckBox está marcado
+                                            if (int.TryParse(txt.Text, out horasTrabajadas))
+                                            {
+                                                valoresTrabajadores[nombreTrabajador] = horasTrabajadas;
+                                            }
+                                            var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
+                                            if (trabajador != null)
+                                            {
+                                                trabajador.Horas = horasTrabajadas;
+                                                db.SaveChanges();
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Aquí calculamos el resultado para cada trabajador y lo almacenamos en un diccionario
-                    int totalHorasTrabajadores = valoresTrabajadores.Values.Sum();
-                    var resultados = new Dictionary<string, double>();
+                        // Aquí calculamos el resultado para cada trabajador y lo almacenamos en un diccionario
+                        int totalHorasTrabajadores = valoresTrabajadores.Values.Sum();
+                        var resultados = new Dictionary<string, double>();
 
-                    if (totalHorasTrabajadores > 0 && int.TryParse(txtBote.Text, out int valorEntero))
-                    {
-                        double cashXHora = (double)valorEntero / totalHorasTrabajadores;
-
-                        foreach (var trabajador in valoresTrabajadores)
+                        if (totalHorasTrabajadores > 0 && int.TryParse(txtBote.Text, out int valorEntero))
                         {
-                            resultados[trabajador.Key] = cashXHora * trabajador.Value;
-                        }
-                    }
-                    // Finalmente, actualizamos los Labels con los resultados calculados
-                    foreach (TableRow row in phTrabajadores.Controls)
-                    {
-                        foreach (TableCell cell in row.Cells)
-                        {
-                            foreach (Control innerControl in cell.Controls)
+                            double cashXHora = (double)valorEntero / totalHorasTrabajadores;
+
+                            foreach (var trabajador in valoresTrabajadores)
                             {
-                                if (innerControl is Label lbl && lbl.ID.StartsWith("lbl"))
+                                resultados[trabajador.Key] = cashXHora * trabajador.Value;
+                            }
+                        }
+                        // Finalmente, actualizamos los Labels con los resultados calculados
+                        foreach (TableRow row in phTrabajadores.Controls)
+                        {
+                            foreach (TableCell cell in row.Cells)
+                            {
+                                foreach (Control innerControl in cell.Controls)
                                 {
-                                    string nombreTrabajador = lbl.ID.Substring(3);
-                                    string resultadoConSimbolo = resultados.ContainsKey(nombreTrabajador) ? resultados[nombreTrabajador].ToString("F2") + " €" : string.Empty;
-                                    lbl.Text = resultadoConSimbolo;
-                                    var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
+                                    if (innerControl is Label lbl && lbl.ID.StartsWith("lbl"))
+                                    {
+                                        string nombreTrabajador = lbl.ID.Substring(3);
+                                        string resultadoConSimbolo = resultados.ContainsKey(nombreTrabajador) ? resultados[nombreTrabajador].ToString("F2") + " €" : string.Empty;
+                                        lbl.Text = resultadoConSimbolo;
+                                        var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
 
-                                    var ultimoBote = resultados.ContainsKey(nombreTrabajador) ? (decimal)resultados[nombreTrabajador] : 0;
-                                    decimal boteAcumulado = Default.BoteAcumulado(ultimoBote, nombreTrabajador);
-                                    trabajador.UltimoBote = ultimoBote;
-                                    trabajador.BoteAcumulado = boteAcumulado;
-                                    db.Trabajadores.AddOrUpdate(t => new { t.UltimoBote, t.BoteAcumulado });
-                                    db.SaveChanges();
+                                        var ultimoBote = resultados.ContainsKey(nombreTrabajador) ? (decimal)resultados[nombreTrabajador] : 0;
+                                        decimal boteAcumulado = BoteAcumulado(ultimoBote, nombreTrabajador);
+                                        trabajador.UltimoBote = ultimoBote;
+                                        trabajador.BoteAcumulado = boteAcumulado;
+                                        db.Trabajadores.AddOrUpdate(t => new { t.UltimoBote, t.BoteAcumulado });
+                                        db.SaveChanges();
+                                    }
                                 }
                             }
                         }
@@ -208,7 +208,6 @@ namespace BoteForms
                 }
             }
         }
-
         protected void chkHabilitarTextBox(object sender, EventArgs e)
         {
             CheckBox chk = sender as CheckBox;
@@ -290,6 +289,43 @@ namespace BoteForms
                     }
                 }
             }
+        }
+        public decimal BoteAcumulado(decimal ultimoBote, string nombre)
+        {
+            using (var db = new AppDbContext())
+            {
+                var usuarioIdActivo = IDusuarioActivo();
+                var trabajador = db.Trabajadores
+                                   .Where(t => t.Nombre == nombre && t.UsuarioID == usuarioIdActivo)
+                                   .Select(t => new { t.BoteAcumulado, t.UltimoBote })
+                                   .FirstOrDefault();
+
+                if (trabajador != null)
+                {
+                    if (trabajador.BoteAcumulado == 0)
+                    {
+                        return ultimoBote;
+                    }
+                    else
+                    {
+                        return trabajador.BoteAcumulado + ultimoBote;
+                    }
+                }
+                else
+                {
+                    return ultimoBote;
+                }
+            }
+        }
+
+        public bool ComprobarVacio()
+        {
+            if (string.IsNullOrEmpty(txtBote.Text))
+            {
+                lblErrorBote.Text = "Este campo no puede estar vacío";
+                return false;
+            }
+            return true;
         }
 
         public int IDusuarioActivo()

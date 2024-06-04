@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Security;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using BoteForms.Data;
 using BoteForms.modelo;
 
@@ -16,15 +12,28 @@ namespace BoteForms
         {
             if (Page.IsValid)
             {
+                // Validar campos vacíos o con espacios en blanco
+                if (string.IsNullOrWhiteSpace(UsernameRegister.Text) ||
+                    string.IsNullOrWhiteSpace(PasswordRegister.Text) ||
+                    string.IsNullOrWhiteSpace(EmailRegister.Text))
+                {
+                    RegisterMessage.Text = "Todos los campos son obligatorios y no pueden estar vacíos.";
+                    return;
+                }
+
                 using (var db = new AppDbContext())
                 {
                     var usuarioExistente = db.Usuarios.FirstOrDefault(u => u.NombreUsuario == UsernameRegister.Text);
                     if (usuarioExistente == null)
                     {
+                        string salt = PasswordHelper.GenerateSalt();
+                        string hashedPassword = PasswordHelper.HashPassword(PasswordRegister.Text, salt);
+
                         var usuario = new Usuario
                         {
                             NombreUsuario = UsernameRegister.Text,
-                            Contraseña = PasswordRegister.Text, // Aquí deberías usar hashing
+                            Contraseña = hashedPassword,
+                            Salt = salt, // Asegúrate de tener una columna Salt en tu base de datos
                             Email = EmailRegister.Text,
                             FechaCreacion = DateTime.Now
                         };

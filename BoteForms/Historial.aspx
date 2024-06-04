@@ -17,10 +17,10 @@
             </tbody>
         </table>
 
-        <asp:panel runat="server" ID="Botones" Visible="false">
+        <asp:panel runat="server" ID="Botones">
         <div class="input-group-append">
                     <asp:Button ID="btnVolver" runat="server" Text="Volver" CssClass="btn btn-primary" OnClick="BtnVolver_Click" />
-                    <asp:Button ID="btnSalir" runat="server" Text="Cerrar sesión" CssClass="btn btn-primary" OnClick="BtnSalir_Click" />>
+                    <asp:Button ID="btnSalir" runat="server" Text="Cerrar sesión" CssClass="btn btn-primary" OnClick="BtnSalir_Click" />
                 </div>        
             </asp:panel>
     </div>

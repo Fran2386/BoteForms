@@ -8,6 +8,7 @@ namespace BoteForms.modelo
         public int UsuarioID { get; set; }
         public string NombreUsuario { get; set; }
         public string Contraseña { get; set; }
+        public string Salt { get; set; } // Nuevo campo
         public string Email { get; set; }
         public DateTime FechaCreacion { get; set; }
     }

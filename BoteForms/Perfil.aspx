@@ -8,8 +8,9 @@
     <div class="row">
         <div class="col-md-4">
             <h2>Total de bote:</h2>
+             <asp:Label runat ="server" ID="lblErrorBote" ForeColor="Red"></asp:Label>
             <div class="input-group">
-                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" min="1" max="1000000" required="true" placeholder="Total del bote recaudado"/>               
+                <asp:TextBox ID="txtBote" runat="server" CssClass="form-control" type="number" min="1" max="1000000" placeholder="Total del bote recaudado"/>               
             </div>
         </div>
     </div>
