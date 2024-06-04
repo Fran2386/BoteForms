@@ -26,12 +26,14 @@ namespace BoteForms
             {
                 // Inicialización que sólo debe ocurrir una vez
                 InicializarDropDownList();
+                
             }
             else
             {
                 // Reconstruir controles dinámicos en cada PostBack
                 int numTrabajadores = Convert.ToInt32(ddlNumeroTrabajadores.SelectedValue);
                 CrearControlesTrabajadores(numTrabajadores);
+                
             }
         }
 
@@ -43,7 +45,7 @@ namespace BoteForms
         private void InicializarDropDownList()
         {
             ddlNumeroTrabajadores.Items.Clear();
-            ddlNumeroTrabajadores.Items.Add(new ListItem("Seleccionar", "0"));
+            ddlNumeroTrabajadores.Items.Add(new ListItem("Seleccionar", "0"));           
             for (int i = 1; i <= 100; i++)
             {
                 ddlNumeroTrabajadores.Items.Add(new ListItem(i.ToString(), i.ToString()));
@@ -52,6 +54,7 @@ namespace BoteForms
 
         private void CrearControlesTrabajadores(int numTrabajadores)
         {
+            Botones.Visible = true;
             phTrabajadores.Controls.Clear(); // Limpiamos los controles anteriores
 
             for (int i = 0; i < numTrabajadores; i++)
@@ -77,6 +80,9 @@ namespace BoteForms
                 txtHoras.ID = "txtHoras_" + i;
                 txtHoras.CssClass = "form-control";
                 txtHoras.TextMode = TextBoxMode.Number;
+                txtHoras.Attributes["min"] = "1"; 
+                txtHoras.Attributes["max"] = "168"; 
+                txtHoras.Attributes["required"] = "true";
                 txtHoras.Attributes["placeholder"] = "Introduce las horas";
                 txtHoras.Enabled = true;
                 cellHoras.Controls.Add(txtHoras);
@@ -95,11 +101,15 @@ namespace BoteForms
                 phTrabajadores.Controls.Add(row);
             }
         }
-
+        
         protected void ddlNumeroTrabajadores_SelectedIndexChanged(object sender, EventArgs e)
         {
             int numTrabajadores = Convert.ToInt32(ddlNumeroTrabajadores.SelectedValue);
             CrearControlesTrabajadores(numTrabajadores);
+            if (numTrabajadores < 1) 
+            {
+                Botones.Visible = false;
+            }
         }
 
         protected void BtnCalcularClick(object sender, EventArgs e)
@@ -303,8 +313,6 @@ namespace BoteForms
             }
         }
 
-
-
         public int IDusuarioActivo()
         {
             if (User.Identity.IsAuthenticated)
@@ -320,7 +328,6 @@ namespace BoteForms
             }
             return 0;
         }
-
     }
 }
 
