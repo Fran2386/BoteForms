@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%: Page.Title %> - Bote</title>
      <script src="Scripts/logoutTemp.js" type="text/javascript"></script>
-     <script src="Scripts/logout.js" type="text/javascript"></script>
+    
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>

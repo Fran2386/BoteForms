@@ -5,7 +5,7 @@
     // Asegúrate de ajustar la URL de la llamada AJAX según tu configuración
     $.ajax({
         type: "POST",
-        url: "Login.aspx/CerrarSesion",
+        url: "Logout.aspx",
         data: "{}",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
