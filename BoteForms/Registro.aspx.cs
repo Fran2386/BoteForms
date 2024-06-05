@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.UI;
 using BoteForms.Data;
 using BoteForms.modelo;
@@ -18,6 +19,13 @@ namespace BoteForms
                     string.IsNullOrWhiteSpace(EmailRegister.Text))
                 {
                     RegisterMessage.Text = "Todos los campos son obligatorios y no pueden estar vacíos.";
+                    return;
+                }
+
+                // Validar el formato del correo electrónico
+                if (!ComprobarEmail(EmailRegister.Text))
+                {
+                    RegisterMessage.Text = "El formato del correo electrónico es incorrecto.";
                     return;
                 }
 
@@ -51,5 +59,13 @@ namespace BoteForms
                 }
             }
         }
+
+        private bool ComprobarEmail(string email)
+        {
+            // Expresión regular para validar el formato del correo electrónico
+            string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            return Regex.IsMatch(email, emailPattern);
+        }
     }
 }
+

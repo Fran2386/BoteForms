@@ -1,10 +1,12 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Perfil.aspx.cs" Inherits="BoteForms.Perfil" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="row">
     <div class="col-md-4">
         <h2>Mi perfil</h2>
         <asp:Label ID="MensajeBienvenida" runat="server" Text="" />
     </div>
+            </div>
     <div class="row">
         <div class="col-md-4">
             <h2>Total de bote:</h2>
