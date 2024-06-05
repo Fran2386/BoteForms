@@ -277,7 +277,7 @@ namespace BoteForms
                     GuardarListaBBDD guardador = new GuardarListaBBDD();
                     if (guardador.GuardarUsuarioActivo(listaTrabajadores))
                     {
-                        string user = "TúNombre"; // Aquí deberías obtener el nombre de donde sea que lo tengas almacenado
+                        string user = User.Identity.Name;
                         Response.Redirect("Confirmacion.aspx?nombre=" + Server.UrlEncode(user));
                     }
                 }

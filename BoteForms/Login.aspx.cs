@@ -80,6 +80,11 @@ namespace BoteForms
         {
             Response.Redirect("~/Registro.aspx");
         }
+  
+        protected void CerrarSesion()
+        {
+            FormsAuthentication.SignOut();
+        }
     }
 }
 

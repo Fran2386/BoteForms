@@ -21,7 +21,7 @@ namespace BoteForms
             }
             else
             {
-                MensajeBienvenida.Text = $"Bienvenido, {User.Identity.Name}!";
+                MensajeBienvenida.Text = $"¡Bienvenido, {User.Identity.Name}!";
                 if (!IsPostBack)
                 {
                     CargarTrabajadores();
@@ -250,10 +250,10 @@ namespace BoteForms
             Response.Redirect("~/Historial.aspx");
         }
 
-        protected void RadioButttonSeleccionado(object sender, EventArgs e)
+        protected void CheckBoxSeleccionado(object sender, EventArgs e)
         {
-            RadioButton selectedRadioButton = sender as RadioButton;
-            if (selectedRadioButton == null) return;
+            CheckBox selectedCheckBox = sender as CheckBox;
+            if (selectedCheckBox == null) return;
 
             using (var db = new AppDbContext())
             {
@@ -278,9 +278,17 @@ namespace BoteForms
                                         var trabajador = trabajadores.FirstOrDefault(t => t.Nombre == nombreTrabajador);
                                         if (trabajador != null)
                                         {
-                                            // Asignar las horas del trabajador al TextBox
-                                            txt.Text = trabajador.Horas.ToString();
-                                            txt.Attributes.Remove("placeholder");
+                                            // Si el CheckBox está marcado, asignar las horas del trabajador al TextBox
+                                            if (selectedCheckBox.Checked)
+                                            {
+                                                txt.Text = trabajador.Horas.ToString();
+                                                txt.Attributes.Remove("placeholder");
+                                            }
+                                            else // Si el CheckBox está desmarcado, restaurar el estado original del TextBox
+                                            {
+                                                txt.Text = string.Empty; // Limpiar el TextBox
+                                                txt.Attributes["placeholder"] = "Introduce las horas";
+                                            }
                                         }
                                     }
                                 }
@@ -290,6 +298,7 @@ namespace BoteForms
                 }
             }
         }
+
         public decimal BoteAcumulado(decimal ultimoBote, string nombre)
         {
             using (var db = new AppDbContext())

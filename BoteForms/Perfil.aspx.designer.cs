@@ -42,22 +42,13 @@ namespace BoteForms
         protected global::System.Web.UI.WebControls.TextBox txtBote;
 
         /// <summary>
-        /// Control ddlOpciones.
+        /// Control chkHorasPredefinidas.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlOpciones;
-
-        /// <summary>
-        /// Control hrsPredefinidas.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton hrsPredefinidas;
+        protected global::System.Web.UI.WebControls.CheckBox chkHorasPredefinidas;
 
         /// <summary>
         /// Control phTrabajadores.

@@ -3,8 +3,7 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="row">
     <div class="col-md-4">
-        <h2>Mi perfil</h2>
-        <asp:Label ID="MensajeBienvenida" runat="server" Text="" />
+        <h2><asp:Label ID="MensajeBienvenida" runat="server" Text="" /></h2>       
     </div>
             </div>
     <div class="row">
@@ -16,23 +15,23 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <div class="col-md-4">
-            <h2>Trabajadores:</h2>
-
-            <asp:DropDownList ID="ddlOpciones" runat="server">
-                <asp:ListItem Text="Opción 1" Value="1"></asp:ListItem>
-                <asp:ListItem Text="Opción 2" Value="2"></asp:ListItem>
-                <asp:ListItem Text="Opción 3" Value="3"></asp:ListItem>
-            </asp:DropDownList>
-
-            <asp:RadioButton ID="hrsPredefinidas" runat="server" Text="Horas predefinidas" GroupName="opciones" AutoPostBack="true" OnCheckedChanged="RadioButttonSeleccionado" />           
+            <h2>Trabajadores:</h2>      
         </div>
-    </div>  
+    </div> 
         <div class="container">
+             <table class="table">
+            <thead>               
+                <tr>
+                    <th></th>
+                    <th><asp:CheckBox ID="chkHorasPredefinidas" runat="server" Text=" &nbsp Marca esto si quieres recuperar las horas de la última sesión" AutoPostBack="true" OnCheckedChanged="CheckBoxSeleccionado" /></th>
+                    <th></th>
+                </tr>
+            </thead>
+                 </table>
         <table class="table">
-            <thead>
+            <thead>               
                 <tr>
                     <th>Trabajador</th>
                     <th>Horas semanales</th>
