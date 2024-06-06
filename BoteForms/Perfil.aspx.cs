@@ -8,6 +8,7 @@ using System.Linq;
 using System.Web.Security;
 using BoteForms.Data;
 using System.Data.Entity.Migrations;
+using BoteForms.modelo;
 
 namespace BoteForms
 {   
@@ -326,6 +327,50 @@ namespace BoteForms
                 }
             }
         }
+
+        protected void btnSaveWorker_Click(object sender, EventArgs e)
+        {
+            if (Page.IsValid) // Verificar si la página es válida antes de guardar
+            {
+                string workerName = txtNewWorkerName.Text;
+                int workerHours = 0;
+
+                if (!string.IsNullOrEmpty(txtNewWorkerHours.Text))
+                {
+                    int.TryParse(txtNewWorkerHours.Text, out workerHours);
+                }
+
+                if (!string.IsNullOrEmpty(workerName))
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        var usuarioActual = IDusuarioActivo();
+
+                        var newWorker = new Trabajador
+                        {
+                            Nombre = workerName,
+                            Horas = workerHours,
+                            UsuarioID = usuarioActual,
+                            UltimoBote = 0,
+                            BoteAcumulado = 0
+                        };
+
+                        db.Trabajadores.AddOrUpdate(newWorker);
+                        db.SaveChanges();
+                    }
+                }
+
+                txtNewWorkerName.Text = string.Empty;
+                txtNewWorkerHours.Text = string.Empty;
+
+                phTrabajadores.Controls.Clear();
+
+                CargarTrabajadores();
+
+                ScriptManager.RegisterStartupScript(this, GetType(), "hideModal", "closeModal();", true);
+            }
+        }
+
 
         public bool ComprobarVacio()
         {

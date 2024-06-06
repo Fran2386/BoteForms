@@ -1,22 +1,22 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="BoteForms.SiteMaster" %>
 
 <!DOCTYPE html>
-
 <html lang="es">
 <head runat="server">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%: Page.Title %> - Bote</title>
-     <script src="Scripts/logoutTemp.js" type="text/javascript"></script>
-    
+    <script src="Scripts/logoutTemp.js" type="text/javascript"></script>
+
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/img/favicons/faviconcalculator.svg" rel="shortcut icon" type="image/x-icon" />
-
+    <!-- Incluir el archivo modal.css -->
+    <link href="~/Content/modal.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
     <form runat="server">
@@ -57,7 +57,7 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li id="liAcceder" runat="server" visible="true"><a runat="server" href="~/Login.aspx">Acceder</a></li>
-                        <li id="liPerfil" runat="server" visible="false"><a runat="server" ID="aPerfil" href="~/Perfil.aspx"></a ></li>
+                        <li id="liPerfil" runat="server" visible="false"><a runat="server" ID="aPerfil" href="~/Perfil.aspx"></a></li>
                     </ul>
                 </div>
             </div>
@@ -70,7 +70,6 @@
                 <p><%: DateTime.Now.Year %> - Fran Villar</p>
             </footer>
         </div>
-
     </form>
 </body>
 </html>
